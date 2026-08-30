@@ -4,6 +4,8 @@ import { getDb, getDbPath } from './db'
 import { settings, subjects, tasks } from './schema'
 import { calendar, todayFocus } from './sessions'
 import { cancel, getState, pause, resume, startFocus } from './timer'
+import { autoBackup, backupsDir, exportData } from './backup'
+import { dailyMinutes, focusBySubject, overview, weekTaskStats } from './stats'
 import {
   createMistake,
   linkMistakeToReview,
@@ -135,6 +137,15 @@ export function registerIpc(): void {
 
   ipcMain.handle('sessions:today', () => todayFocus())
   ipcMain.handle('sessions:calendar', () => calendar())
+
+  // ---------- 统计与备份 ----------
+
+  ipcMain.handle('stats:overview', () => overview())
+  ipcMain.handle('stats:bySubject', () => focusBySubject())
+  ipcMain.handle('stats:dailyMinutes', () => dailyMinutes())
+  ipcMain.handle('tasks:weekStats', () => weekTaskStats())
+  ipcMain.handle('data:export', () => exportData())
+  ipcMain.handle('data:backupsDir', () => backupsDir())
 
   // ---------- 复习 ----------
 

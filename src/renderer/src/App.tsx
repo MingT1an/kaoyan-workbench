@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { BarChart3 } from 'lucide-react'
 import Sidebar from './components/Sidebar'
-import PlaceholderPage from './components/PlaceholderPage'
 import TodayPage from './pages/TodayPage'
 import PlanPage from './pages/PlanPage'
 import PomodoroPage from './pages/PomodoroPage'
 import ReviewPage from './pages/ReviewPage'
 import MistakesPage from './pages/MistakesPage'
+import StatsPage from './pages/StatsPage'
 import SettingsPage from './pages/SettingsPage'
 
 export type PageId =
@@ -30,14 +29,7 @@ export default function App() {
         {page === 'pomodoro' && <PomodoroPage />}
         {page === 'mistakes' && <MistakesPage />}
         {page === 'review' && <ReviewPage />}
-        {page === 'stats' && (
-          <PlaceholderPage
-            icon={BarChart3}
-            title="统计"
-            version="V0.6"
-            description="学习时长趋势、科目占比、打卡热力图与连续打卡天数"
-          />
-        )}
+        {page === 'stats' && <StatsPage />}
         {page === 'settings' && <SettingsPage />}
       </main>
     </div>

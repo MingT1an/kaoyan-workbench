@@ -22,6 +22,30 @@ import type {
   TodayFocus
 } from '../shared/types'
 
+export interface SubjectMinutes {
+  name: string
+  color: string
+  minutes: number
+}
+
+export interface DayMinutes {
+  date: string
+  minutes: number
+}
+
+export interface WeekStats {
+  done: number
+  total: number
+}
+
+export interface Overview {
+  totalMinutes: number
+  totalPomodoros: number
+  mistakeCount: number
+  reviewCount: number
+  reviewReviewed: number
+}
+
 const api = {
   subjects: {
     list: (): Promise<Subject[]> => ipcRenderer.invoke('subjects:list'),
@@ -49,6 +73,16 @@ const api = {
   sessions: {
     today: (): Promise<TodayFocus> => ipcRenderer.invoke('sessions:today'),
     calendar: (): Promise<CalendarDay[]> => ipcRenderer.invoke('sessions:calendar')
+  },
+  stats: {
+    overview: (): Promise<Overview> => ipcRenderer.invoke('stats:overview'),
+    bySubject: (): Promise<SubjectMinutes[]> => ipcRenderer.invoke('stats:bySubject'),
+    dailyMinutes: (): Promise<DayMinutes[]> => ipcRenderer.invoke('stats:dailyMinutes'),
+    weekTasks: (): Promise<WeekStats> => ipcRenderer.invoke('tasks:weekStats')
+  },
+  data: {
+    export: (): Promise<string | null> => ipcRenderer.invoke('data:export'),
+    backupsDir: (): Promise<string> => ipcRenderer.invoke('data:backupsDir')
   },
   review: {
     due: (): Promise<ReviewItem[]> => ipcRenderer.invoke('review:due'),

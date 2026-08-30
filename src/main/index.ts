@@ -5,6 +5,7 @@ import { closeDatabase, initDatabase } from './db'
 import { registerIpc } from './ipc'
 import { cancel, getState, initTimer } from './timer'
 import { createTray, updateTrayTooltip } from './tray'
+import { autoBackup } from './backup'
 
 let mainWindow: BrowserWindow | null = null
 let outWatcher: FSWatcher | null = null
@@ -113,6 +114,7 @@ if (!gotLock) {
     app.setAccessibilitySupportEnabled(true)
     initDatabase()
     registerIpc()
+    autoBackup()
 
     initTimer({
       broadcast: (state) => {
