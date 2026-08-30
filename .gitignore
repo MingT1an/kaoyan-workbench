@@ -4,3 +4,4 @@ dist/
 .diag/
 *.log
 .DS_Store
+kaoyan-backup-*.json
