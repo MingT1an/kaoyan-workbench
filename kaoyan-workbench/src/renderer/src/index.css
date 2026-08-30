@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #eef3fb;
+  --color-side: rgba(255, 255, 255, 0.55);
+  --color-panel: rgba(255, 255, 255, 0.62);
+  --color-panel2: rgba(255, 255, 255, 0.55);
+  --color-line: rgba(255, 255, 255, 0.65);
+  --color-ink: #1b2230;
+  --color-mute: #68738a;
+  --color-brand: #007aff;
+  --color-ok: #34c759;
+  --color-warn: #ff9500;
+  --color-bad: #ff3b30;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: "Segoe UI Variable Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 液态玻璃底衬:固定渐变壁纸,玻璃面板的 backdrop-blur 采样这一层 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #eaf0fa;
+  background-image:
+    radial-gradient(56rem 40rem at 88% -12%, rgba(64, 132, 255, 0.38), transparent 62%),
+    radial-gradient(46rem 34rem at -18% 22%, rgba(151, 106, 255, 0.3), transparent 62%),
+    radial-gradient(44rem 34rem at 58% 118%, rgba(52, 199, 159, 0.3), transparent 62%),
+    radial-gradient(30rem 26rem at 30% 55%, rgba(255, 159, 10, 0.14), transparent 65%);
+}
+
+/* 三档液态玻璃材质:卡片 / 侧栏 / 弹窗 */
+.glass {
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(28px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 8px 32px rgba(31, 45, 80, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.glass-rail {
+  background: rgba(255, 255, 255, 0.46);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 8px 32px rgba(31, 45, 80, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(36px) saturate(1.8);
+  -webkit-backdrop-filter: blur(36px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 24px 64px rgba(31, 45, 80, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.32);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+input[type="color"] {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 9px;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 0.4;
+}

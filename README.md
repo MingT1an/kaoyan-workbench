@@ -1,32 +1,52 @@
-# 考研工作台
+# 考研个人工作台 (KaoyanWorkbench)
 
-自用桌面端考研备考工作台:把「计划 → 执行 → 记录 → 复习」闭环收进一个窗口。
+单机、离线、本地数据的 Windows 桌面应用，把备考闭环装进一个窗口：
 
-技术栈:Electron + electron-vite + React + TypeScript + Tailwind CSS v4 + better-sqlite3 + Drizzle ORM。
+> 今天学什么（计划） → 专注多久（番茄钟） → 哪里薄弱（错题本） → 何时巩固（艾宾浩斯复习） → 效果如何（统计）。
 
-## 开发
+界面采用 iOS 26「Liquid Glass」液态玻璃风格：彩色渐变壁纸打底，磨砂玻璃面板悬浮其上。
+
+![今日页](kaoyan-workbench/docs/images/today.png)
+
+![专注页](kaoyan-workbench/docs/images/focus.png)
+
+![错题本](kaoyan-workbench/docs/images/mistakes.png)
+
+## 功能特性
+
+- **今日**：考试倒计时、当前阶段判定、今日任务、专注概览、待复习入口，一屏总览
+- **计划**：按日任务管理，重复模板（每天/工作日）自动生成当日实例，逾期任务集中改期
+- **专注**：主进程番茄状态机，关窗进托盘照常计时，完成弹系统通知，每 4 个番茄长休息
+- **错题本**：Ctrl+V 直接粘贴截图，掌握度跟踪，勾选即加入复习队列
+- **复习**：艾宾浩斯间隔调度（记得/模糊/忘了三档反馈），与错题掌握度双向联动
+- **统计**：专注时长、连续打卡、近 14 天趋势、科目分布、任务完成率
+- **数据安全**：本地 JSON 原子写入（临时文件 + 替换），一键导出/导入完整备份（含截图）
+
+## 快速开始
+
+要求 Node.js 18+。
 
 ```bash
+git clone https://github.com/MingT1an/kaoyan-workbench.git
+cd kaoyan-workbench/kaoyan-workbench
 npm install
-npm run dev:local  # 推荐:本地构建 + 文件加载,改动 src 后自动重建并刷新/重启
-npm run dev        # HMR 模式(本机若有安全软件拦截本地回环连接会加载失败)
-npm run build      # 构建生产包到 out/
-npm run typecheck  # 类型检查
+
+npm run dev     # 开发模式（热更新）
+npm run build   # 构建
+npm run start   # 运行已构建版本
+npm run smoke   # 端到端启动自检
 ```
 
-> 本机说明:Clash/安全软件可能拦截 Chromium 对 `127.0.0.1` dev server 的部分连接,
-> 导致 `npm run dev` 白屏或加载超时;`dev:local` 完全不依赖本地 HTTP,可稳定使用。
-> 主进程代码变更后 `dev:local` 会自动重启应用;渲染层变更约 1-2 秒后窗口自动刷新。
+## 技术栈
 
-数据存储在 `%APPDATA%/kaoyan-workbench/kaoyan.db`(SQLite,单文件)。
+Electron 44 · electron-vite 5 · React 19 · TypeScript 7 · Tailwind CSS 4 · lucide-react
 
-## 版本路线
+存储层为自有 JSON 方案（零原生依赖），数据 100% 存本机（`%APPDATA%/KaoyanWorkbench`）——无账号、无网络请求、无遥测，备份即拷贝。
 
-- [x] V0.1 骨架 — 侧边栏布局、科目管理、考试倒计时、全局设置、SQLite 全量表结构
-- [x] V0.2 计划 — 任务增删改查、今日任务清单(日期切换)、重复任务(每天/每周几)、阶段规划
-- [x] V0.3 番茄钟 — 主进程计时(关窗缩托盘不停表)、绑定任务、暂停/放弃、自动休息与系统通知、时长入库、打卡日历
-- [x] V0.4 复习 — 艾宾浩斯复习引擎(记得/模糊/忘了三档自评)、复习卡片、今日页到期推送
-- [x] V0.5 错题本 — 错题录入(截图粘贴)、筛选与掌握度流转、一键加入复习队列
-- [x] V0.6 统计 — 30 天趋势图、科目占比、本周完成率、启动自动备份 + JSON 手动导出
+产品定位、交互规则与版本规划见 [产品策划案](kaoyan-workbench/docs/策划案.md)。
 
-全部 6 个版本已交付 🎉
+## 版本
+
+- **V1.1** — 液态玻璃浅色主题（iOS 26 风格重构）、截图模式（`npm run shots`）
+- **V1.0** — 七大模块整体重构：今日/计划/专注/错题本/复习/统计/设置
+- **V0.1–V0.6** — 早期原型：科目与倒计时、计划任务、番茄钟、复习引擎、错题本、统计看板

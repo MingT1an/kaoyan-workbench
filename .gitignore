@@ -1,7 +1,6 @@
+jiangxin_ppt/
 node_modules/
-out/
-dist/
-.diag/
+.shots/
 *.log
-.DS_Store
-kaoyan-backup-*.json
+*.db
+*.db-journal
