@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        working-directory: kaoyan-workbench
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: kaoyan-workbench
+        run: npm run typecheck
+
+      - name: Build bundles
+        working-directory: kaoyan-workbench
+        run: npm run build
+
+      - name: Package Windows installers
+        working-directory: kaoyan-workbench
+        run: npx electron-builder --win --publish never
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            kaoyan-workbench/release/*.exe
+          fail_on_unmatched_files: true
