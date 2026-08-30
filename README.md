@@ -22,7 +22,16 @@
 - **统计**：专注时长、连续打卡、近 14 天趋势、科目分布、任务完成率
 - **数据安全**：本地 JSON 原子写入（临时文件 + 替换），一键导出/导入完整备份（含截图）
 
-## 快速开始
+## 下载安装（普通用户）
+
+无需安装 Node.js，前往 [**Releases**](https://github.com/MingT1an/kaoyan-workbench/releases) 页面下载最新版：
+
+- `KaoyanWorkbench-Setup-x.x.x.exe` — 安装版（推荐），含开始菜单与桌面快捷方式
+- `KaoyanWorkbench-x.x.x-portable.exe` — 免安装单文件版，下载后双击即用
+
+> 应用未做代码签名，首次运行如遇「Windows 已保护你的电脑」，点击「更多信息」→「仍要运行」即可。
+
+## 快速开始（开发者）
 
 要求 Node.js 18+。
 

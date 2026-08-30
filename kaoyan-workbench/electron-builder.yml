@@ -1,0 +1,22 @@
+appId: com.mingt1an.kaoyanworkbench
+productName: KaoyanWorkbench
+directories:
+  output: release
+files:
+  - out/**
+  - assets/**
+  - package.json
+win:
+  icon: assets/icon.png
+  target:
+    - nsis
+    - portable
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: 考研个人工作台
+  artifactName: KaoyanWorkbench-Setup-${version}.${ext}
+portable:
+  artifactName: KaoyanWorkbench-${version}-portable.${ext}
