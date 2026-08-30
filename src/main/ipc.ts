@@ -5,6 +5,15 @@ import { settings, subjects, tasks } from './schema'
 import { calendar, todayFocus } from './sessions'
 import { cancel, getState, pause, resume, startFocus } from './timer'
 import {
+  createMistake,
+  linkMistakeToReview,
+  listMistakes,
+  readMistakeImage,
+  removeMistake,
+  saveMistakeImage,
+  updateMistake
+} from './mistakes'
+import {
   allItems,
   createReview,
   dueItems,
@@ -14,6 +23,8 @@ import {
   upcomingItems
 } from './review'
 import type {
+  Mastery,
+  MistakeInput,
   ReviewInput,
   ReviewResult,
   SubjectInput,
@@ -143,6 +154,23 @@ export function registerIpc(): void {
     gradeReview(Number(id), result)
   )
   ipcMain.handle('review:remove', (_event, id: number) => removeReview(Number(id)))
+
+  // ---------- 错题本 ----------
+
+  ipcMain.handle('mistakes:list', (_event, filter: { subjectId?: number | null; mastery?: string | null }) =>
+    listMistakes({
+      subjectId: filter?.subjectId != null ? Number(filter.subjectId) : null,
+      mastery: (filter?.mastery as Mastery) || null
+    })
+  )
+  ipcMain.handle('mistakes:create', (_event, input: MistakeInput) => createMistake(input))
+  ipcMain.handle('mistakes:update', (_event, id: number, patch: { mastery?: string }) =>
+    updateMistake(Number(id), { mastery: patch?.mastery as Mastery })
+  )
+  ipcMain.handle('mistakes:remove', (_event, id: number) => removeMistake(Number(id)))
+  ipcMain.handle('mistakes:linkReview', (_event, id: number) => linkMistakeToReview(Number(id)))
+  ipcMain.handle('mistakes:saveImage', (_event, dataUrl: string) => saveMistakeImage(String(dataUrl)))
+  ipcMain.handle('mistakes:image', (_event, file: string) => readMistakeImage(String(file)))
 
   // ---------- 任务 ----------
 

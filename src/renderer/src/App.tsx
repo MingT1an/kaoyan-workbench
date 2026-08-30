@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { BarChart3, BookX } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import PlaceholderPage from './components/PlaceholderPage'
 import TodayPage from './pages/TodayPage'
 import PlanPage from './pages/PlanPage'
 import PomodoroPage from './pages/PomodoroPage'
 import ReviewPage from './pages/ReviewPage'
+import MistakesPage from './pages/MistakesPage'
 import SettingsPage from './pages/SettingsPage'
 
 export type PageId =
@@ -27,14 +28,7 @@ export default function App() {
         {page === 'today' && <TodayPage onNavigate={(p) => setPage(p as PageId)} />}
         {page === 'plan' && <PlanPage />}
         {page === 'pomodoro' && <PomodoroPage />}
-        {page === 'mistakes' && (
-          <PlaceholderPage
-            icon={BookX}
-            title="错题本"
-            version="V0.5"
-            description="错题录入(支持截图粘贴)、分类标记,并可一键加入复习队列"
-          />
-        )}
+        {page === 'mistakes' && <MistakesPage />}
         {page === 'review' && <ReviewPage />}
         {page === 'stats' && (
           <PlaceholderPage

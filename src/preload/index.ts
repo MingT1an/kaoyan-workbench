@@ -2,6 +2,9 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type {
   AppInfo,
   CalendarDay,
+  Mastery,
+  Mistake,
+  MistakeInput,
   ReviewInput,
   ReviewItem,
   ReviewResult,
@@ -57,6 +60,17 @@ const api = {
     grade: (id: number, result: ReviewResult): Promise<ReviewItem> =>
       ipcRenderer.invoke('review:grade', id, result),
     remove: (id: number): Promise<void> => ipcRenderer.invoke('review:remove', id)
+  },
+  mistakes: {
+    list: (filter: { subjectId?: number | null; mastery?: Mastery | null }): Promise<Mistake[]> =>
+      ipcRenderer.invoke('mistakes:list', filter),
+    create: (input: MistakeInput): Promise<Mistake> => ipcRenderer.invoke('mistakes:create', input),
+    setMastery: (id: number, mastery: Mastery): Promise<Mistake> =>
+      ipcRenderer.invoke('mistakes:update', id, { mastery }),
+    remove: (id: number): Promise<void> => ipcRenderer.invoke('mistakes:remove', id),
+    linkReview: (id: number): Promise<void> => ipcRenderer.invoke('mistakes:linkReview', id),
+    saveImage: (dataUrl: string): Promise<string> => ipcRenderer.invoke('mistakes:saveImage', dataUrl),
+    image: (file: string): Promise<string> => ipcRenderer.invoke('mistakes:image', file)
   },
   onTimerChanged: (callback: (state: TimerState) => void): (() => void) => {
     const listener = (_event: unknown, state: TimerState): void => callback(state)

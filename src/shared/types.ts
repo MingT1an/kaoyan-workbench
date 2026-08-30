@@ -146,6 +146,35 @@ export interface ReviewStats {
   reviewedToday: number
 }
 
+export type Mastery = 'unknown' | 'fuzzy' | 'mastered'
+
+export interface Mistake {
+  id: number
+  subjectId: number | null
+  chapter: string | null
+  question: string
+  imagePath: string | null
+  wrongReason: string | null
+  solution: string | null
+  mastery: Mastery
+  createdAt: string
+  updatedAt: string
+  subjectName: string | null
+  subjectColor: string | null
+  /** 是否已加入复习队列 */
+  inReview: boolean
+}
+
+export interface MistakeInput {
+  subjectId: number | null
+  chapter?: string | null
+  question: string
+  wrongReason?: string | null
+  solution?: string | null
+  mastery?: Mastery
+  imagePath?: string | null
+}
+
 export const SETTING_KEYS = {
   examDate: 'exam_date',
   pomodoroFocus: 'pomodoro_focus_min',
