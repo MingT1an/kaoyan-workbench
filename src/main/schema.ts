@@ -56,7 +56,7 @@ export const mistakes = sqliteTable('mistakes', {
 
 export const reviewItems = sqliteTable('review_items', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  sourceType: text('source_type'),
+  sourceType: text('source_type', { enum: ['note', 'mistake'] }),
   sourceId: integer('source_id'),
   title: text('title').notNull(),
   content: text('content'),

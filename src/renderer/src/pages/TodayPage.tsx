@@ -28,7 +28,7 @@ function dateLabel(date: string, offset: number): string {
   return base
 }
 
-export default function TodayPage() {
+export default function TodayPage({ onNavigate }: { onNavigate: (page: string) => void }) {
   const [settings, setSettings] = useState<SettingsMap | null>(null)
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [tasks, setTasks] = useState<TaskWithSubject[]>([])
@@ -37,6 +37,7 @@ export default function TodayPage() {
   const [minutes, setMinutes] = useState('')
   const [subjectId, setSubjectId] = useState<number | null>(null)
   const [focus, setFocus] = useState<TodayFocus | null>(null)
+  const [reviewDue, setReviewDue] = useState(0)
 
   const date = useMemo(() => {
     const d = new Date()
@@ -64,6 +65,7 @@ export default function TodayPage() {
   useEffect(() => {
     reload()
     reloadFocus()
+    reloadReview()
     const off = window.api.onTimerChanged(() => reloadFocus())
     return off
   }, [date])
@@ -79,6 +81,13 @@ export default function TodayPage() {
     window.api.sessions
       .today()
       .then(setFocus)
+      .catch(() => {})
+  }
+
+  function reloadReview() {
+    window.api.review
+      .due()
+      .then((list) => setReviewDue(list.length))
       .catch(() => {})
   }
 
@@ -183,7 +192,12 @@ export default function TodayPage() {
           value={`${focus?.minutes ?? 0} 分钟`}
           hint={focus && focus.pomodoros > 0 ? `已完成 ${focus.pomodoros} 个番茄` : '去番茄钟开始第一轮吧'}
         />
-        <StatCard icon={Brain} label="待复习" value="0" hint="复习引擎将在 V0.4 接入" />
+        <StatCard
+          icon={Brain}
+          label="待复习"
+          value={String(reviewDue)}
+          hint={reviewDue > 0 ? '有到期知识点,记得复习' : '复习引擎已上线(V0.4)'}
+        />
       </section>
 
       <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -314,11 +328,24 @@ export default function TodayPage() {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <h3 className="text-sm font-semibold text-slate-700">今日复习</h3>
-          <div className="mt-4 flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-200 px-4 text-center text-sm text-slate-400">
-            到期的知识点与错题将出现在这里(V0.4)
-          </div>
+          {reviewDue > 0 ? (
+            <div className="mt-4 flex flex-col items-center justify-center rounded-xl bg-indigo-50/60 px-4 py-8 text-center">
+              <p className="text-3xl font-bold text-indigo-600">{reviewDue}</p>
+              <p className="mt-1 text-xs text-slate-500">个知识点已到期</p>
+              <button
+                onClick={() => onNavigate('review')}
+                className="mt-4 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+              >
+                去复习
+              </button>
+            </div>
+          ) : (
+            <div className="mt-4 flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-200 px-4 text-center text-sm text-slate-400">
+              没有到期的复习项,在「复习」页添加知识点
+            </div>
+          )}
           <p className="mt-4 text-xs leading-5 text-slate-400">
-            提示:在「计划」页可以创建重复任务(如每天背单词),会自动出现在每天的任务清单里
+            提示:错题本里的错题可一键加入复习队列
           </p>
         </div>
       </section>

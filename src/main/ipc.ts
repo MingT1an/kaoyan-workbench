@@ -4,7 +4,18 @@ import { getDb, getDbPath } from './db'
 import { settings, subjects, tasks } from './schema'
 import { calendar, todayFocus } from './sessions'
 import { cancel, getState, pause, resume, startFocus } from './timer'
+import {
+  allItems,
+  createReview,
+  dueItems,
+  gradeReview,
+  removeReview,
+  reviewStats,
+  upcomingItems
+} from './review'
 import type {
+  ReviewInput,
+  ReviewResult,
   SubjectInput,
   SubjectUpdate,
   TaskInput,
@@ -113,6 +124,25 @@ export function registerIpc(): void {
 
   ipcMain.handle('sessions:today', () => todayFocus())
   ipcMain.handle('sessions:calendar', () => calendar())
+
+  // ---------- 复习 ----------
+
+  ipcMain.handle('review:due', () => dueItems())
+  ipcMain.handle('review:upcoming', () => upcomingItems())
+  ipcMain.handle('review:all', () => allItems())
+  ipcMain.handle('review:stats', () => reviewStats())
+  ipcMain.handle('review:create', (_event, input: ReviewInput) =>
+    createReview({
+      title: input?.title ?? '',
+      content: input?.content ?? null,
+      sourceType: 'note',
+      sourceId: null
+    })
+  )
+  ipcMain.handle('review:grade', (_event, id: number, result: ReviewResult) =>
+    gradeReview(Number(id), result)
+  )
+  ipcMain.handle('review:remove', (_event, id: number) => removeReview(Number(id)))
 
   // ---------- 任务 ----------
 

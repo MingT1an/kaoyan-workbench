@@ -121,6 +121,31 @@ export interface TimerStartInput {
   subjectId: number | null
 }
 
+export type ReviewResult = 'remember' | 'fuzzy' | 'forgot'
+
+export interface ReviewItem {
+  id: number
+  sourceType: 'note' | 'mistake' | null
+  sourceId: number | null
+  title: string
+  content: string | null
+  intervalIndex: number
+  nextDueDate: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ReviewInput {
+  title: string
+  content?: string | null
+}
+
+export interface ReviewStats {
+  total: number
+  due: number
+  reviewedToday: number
+}
+
 export const SETTING_KEYS = {
   examDate: 'exam_date',
   pomodoroFocus: 'pomodoro_focus_min',

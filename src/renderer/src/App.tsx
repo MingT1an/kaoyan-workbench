@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { BarChart3, BookX, RotateCcw } from 'lucide-react'
+import { BarChart3, BookX } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import PlaceholderPage from './components/PlaceholderPage'
 import TodayPage from './pages/TodayPage'
 import PlanPage from './pages/PlanPage'
 import PomodoroPage from './pages/PomodoroPage'
+import ReviewPage from './pages/ReviewPage'
 import SettingsPage from './pages/SettingsPage'
 
 export type PageId =
@@ -23,7 +24,7 @@ export default function App() {
     <div className="flex h-screen overflow-hidden bg-[#f5f6fa] text-slate-800">
       <Sidebar current={page} onChange={setPage} />
       <main className="h-full flex-1 overflow-y-auto">
-        {page === 'today' && <TodayPage />}
+        {page === 'today' && <TodayPage onNavigate={(p) => setPage(p as PageId)} />}
         {page === 'plan' && <PlanPage />}
         {page === 'pomodoro' && <PomodoroPage />}
         {page === 'mistakes' && (
@@ -34,14 +35,7 @@ export default function App() {
             description="错题录入(支持截图粘贴)、分类标记,并可一键加入复习队列"
           />
         )}
-        {page === 'review' && (
-          <PlaceholderPage
-            icon={RotateCcw}
-            title="复习"
-            version="V0.4"
-            description="艾宾浩斯遗忘曲线复习引擎,到期知识点自动进入今日清单"
-          />
-        )}
+        {page === 'review' && <ReviewPage />}
         {page === 'stats' && (
           <PlaceholderPage
             icon={BarChart3}

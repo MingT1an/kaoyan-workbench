@@ -2,6 +2,10 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type {
   AppInfo,
   CalendarDay,
+  ReviewInput,
+  ReviewItem,
+  ReviewResult,
+  ReviewStats,
   SettingsMap,
   Subject,
   SubjectInput,
@@ -42,6 +46,17 @@ const api = {
   sessions: {
     today: (): Promise<TodayFocus> => ipcRenderer.invoke('sessions:today'),
     calendar: (): Promise<CalendarDay[]> => ipcRenderer.invoke('sessions:calendar')
+  },
+  review: {
+    due: (): Promise<ReviewItem[]> => ipcRenderer.invoke('review:due'),
+    upcoming: (): Promise<ReviewItem[]> => ipcRenderer.invoke('review:upcoming'),
+    all: (): Promise<ReviewItem[]> => ipcRenderer.invoke('review:all'),
+    stats: (): Promise<ReviewStats> => ipcRenderer.invoke('review:stats'),
+    create: (input: ReviewInput): Promise<ReviewItem> =>
+      ipcRenderer.invoke('review:create', input),
+    grade: (id: number, result: ReviewResult): Promise<ReviewItem> =>
+      ipcRenderer.invoke('review:grade', id, result),
+    remove: (id: number): Promise<void> => ipcRenderer.invoke('review:remove', id)
   },
   onTimerChanged: (callback: (state: TimerState) => void): (() => void) => {
     const listener = (_event: unknown, state: TimerState): void => callback(state)
