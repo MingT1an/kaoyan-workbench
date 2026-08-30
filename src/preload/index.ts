@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type {
   AppInfo,
+  CalendarDay,
   SettingsMap,
   Subject,
   SubjectInput,
@@ -8,7 +9,10 @@ import type {
   Task,
   TaskInput,
   TaskUpdate,
-  TaskWithSubject
+  TaskWithSubject,
+  TimerStartInput,
+  TimerState,
+  TodayFocus
 } from '../shared/types'
 
 const api = {
@@ -26,6 +30,25 @@ const api = {
     update: (input: TaskUpdate): Promise<Task> => ipcRenderer.invoke('tasks:update', input),
     toggle: (id: number): Promise<Task> => ipcRenderer.invoke('tasks:toggle', id),
     remove: (id: number): Promise<void> => ipcRenderer.invoke('tasks:remove', id)
+  },
+  timer: {
+    getState: (): Promise<TimerState> => ipcRenderer.invoke('timer:getState'),
+    start: (input: TimerStartInput): Promise<TimerState> =>
+      ipcRenderer.invoke('timer:start', input),
+    pause: (): Promise<TimerState> => ipcRenderer.invoke('timer:pause'),
+    resume: (): Promise<TimerState> => ipcRenderer.invoke('timer:resume'),
+    cancel: (): Promise<TimerState> => ipcRenderer.invoke('timer:cancel')
+  },
+  sessions: {
+    today: (): Promise<TodayFocus> => ipcRenderer.invoke('sessions:today'),
+    calendar: (): Promise<CalendarDay[]> => ipcRenderer.invoke('sessions:calendar')
+  },
+  onTimerChanged: (callback: (state: TimerState) => void): (() => void) => {
+    const listener = (_event: unknown, state: TimerState): void => callback(state)
+    ipcRenderer.on('timer:changed', listener)
+    return () => {
+      ipcRenderer.removeListener('timer:changed', listener)
+    }
   },
   settings: {
     all: (): Promise<SettingsMap> => ipcRenderer.invoke('settings:all'),

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Brain, ChevronLeft, ChevronRight, Clock3, ListTodo, Plus, Repeat, Trash2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { SETTING_KEYS, type Subject, type SettingsMap, type TaskWithSubject } from '../../../shared/types'
+import { SETTING_KEYS, type Subject, type SettingsMap, type TaskWithSubject, type TodayFocus } from '../../../shared/types'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -36,6 +36,7 @@ export default function TodayPage() {
   const [title, setTitle] = useState('')
   const [minutes, setMinutes] = useState('')
   const [subjectId, setSubjectId] = useState<number | null>(null)
+  const [focus, setFocus] = useState<TodayFocus | null>(null)
 
   const date = useMemo(() => {
     const d = new Date()
@@ -62,6 +63,9 @@ export default function TodayPage() {
 
   useEffect(() => {
     reload()
+    reloadFocus()
+    const off = window.api.onTimerChanged(() => reloadFocus())
+    return off
   }, [date])
 
   function reload() {
@@ -69,6 +73,13 @@ export default function TodayPage() {
       .listByDate(date)
       .then(setTasks)
       .catch((err) => console.error('加载任务失败', err))
+  }
+
+  function reloadFocus() {
+    window.api.sessions
+      .today()
+      .then(setFocus)
+      .catch(() => {})
   }
 
   async function add() {
@@ -166,7 +177,12 @@ export default function TodayPage() {
               : '还没有安排任务'
           }
         />
-        <StatCard icon={Clock3} label="今日专注" value="0 分钟" hint="番茄钟将在 V0.3 接入" />
+        <StatCard
+          icon={Clock3}
+          label="今日专注"
+          value={`${focus?.minutes ?? 0} 分钟`}
+          hint={focus && focus.pomodoros > 0 ? `已完成 ${focus.pomodoros} 个番茄` : '去番茄钟开始第一轮吧'}
+        />
         <StatCard icon={Brain} label="待复习" value="0" hint="复习引擎将在 V0.4 接入" />
       </section>
 

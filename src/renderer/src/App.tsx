@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { BarChart3, BookX, RotateCcw, Timer } from 'lucide-react'
+import { BarChart3, BookX, RotateCcw } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import PlaceholderPage from './components/PlaceholderPage'
 import TodayPage from './pages/TodayPage'
 import PlanPage from './pages/PlanPage'
+import PomodoroPage from './pages/PomodoroPage'
 import SettingsPage from './pages/SettingsPage'
 
 export type PageId =
@@ -24,14 +25,7 @@ export default function App() {
       <main className="h-full flex-1 overflow-y-auto">
         {page === 'today' && <TodayPage />}
         {page === 'plan' && <PlanPage />}
-        {page === 'pomodoro' && (
-          <PlaceholderPage
-            icon={Timer}
-            title="番茄钟"
-            version="V0.3"
-            description="专注计时、绑定任务、托盘常驻与学习时长统计"
-          />
-        )}
+        {page === 'pomodoro' && <PomodoroPage />}
         {page === 'mistakes' && (
           <PlaceholderPage
             icon={BookX}

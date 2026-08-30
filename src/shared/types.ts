@@ -74,6 +74,53 @@ export interface Phase {
   end: string
 }
 
+export type TimerStatus = 'idle' | 'focus' | 'break' | 'long_break'
+
+export interface TimerState {
+  status: TimerStatus
+  taskId: number | null
+  subjectId: number | null
+  taskTitle: string | null
+  startedAt: string | null
+  endsAt: string | null
+  paused: boolean
+  remainingMs: number
+  plannedMinutes: number
+  /** 今日已完成的专注番茄数 */
+  pomodoros: number
+}
+
+export interface SessionRow {
+  id: number
+  taskId: number | null
+  subjectId: number | null
+  startedAt: string
+  endedAt: string | null
+  plannedMinutes: number
+  actualMinutes: number | null
+  status: string
+  subjectName: string | null
+  subjectColor: string | null
+  taskTitle: string | null
+}
+
+export interface TodayFocus {
+  minutes: number
+  pomodoros: number
+  recent: SessionRow[]
+}
+
+export interface CalendarDay {
+  date: string
+  minutes: number
+  pomodoros: number
+}
+
+export interface TimerStartInput {
+  taskId: number | null
+  subjectId: number | null
+}
+
 export const SETTING_KEYS = {
   examDate: 'exam_date',
   pomodoroFocus: 'pomodoro_focus_min',

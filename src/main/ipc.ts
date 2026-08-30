@@ -2,7 +2,15 @@ import { app, ipcMain } from 'electron'
 import { and, asc, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 import { getDb, getDbPath } from './db'
 import { settings, subjects, tasks } from './schema'
-import type { SubjectInput, SubjectUpdate, TaskInput, TaskUpdate } from '../shared/types'
+import { calendar, todayFocus } from './sessions'
+import { cancel, getState, pause, resume, startFocus } from './timer'
+import type {
+  SubjectInput,
+  SubjectUpdate,
+  TaskInput,
+  TaskUpdate,
+  TimerStartInput
+} from '../shared/types'
 
 function now(): string {
   return new Date().toISOString()
@@ -85,6 +93,26 @@ export function registerIpc(): void {
   })
 
   ipcMain.handle('app:info', () => ({ dbPath: getDbPath(), version: app.getVersion() }))
+
+  // ---------- 番茄钟 ----------
+
+  ipcMain.handle('timer:getState', () => getState())
+
+  ipcMain.handle('timer:start', (_event, input: TimerStartInput) =>
+    startFocus({
+      taskId: input?.taskId != null ? Number(input.taskId) : null,
+      subjectId: input?.subjectId != null ? Number(input.subjectId) : null
+    })
+  )
+
+  ipcMain.handle('timer:pause', () => pause())
+  ipcMain.handle('timer:resume', () => resume())
+  ipcMain.handle('timer:cancel', () => cancel())
+
+  // ---------- 专注统计 ----------
+
+  ipcMain.handle('sessions:today', () => todayFocus())
+  ipcMain.handle('sessions:calendar', () => calendar())
 
   // ---------- 任务 ----------
 
