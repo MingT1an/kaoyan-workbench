@@ -25,14 +25,70 @@ export interface SubjectUpdate {
   color?: string
 }
 
+/** 重复规则:'daily' 或 'weekdays:0,3'(数字为星期几,0=周日) */
+export type RepeatRule = string
+
+export interface Task {
+  id: number
+  subjectId: number | null
+  title: string
+  date: string
+  estimatedMinutes: number | null
+  priority: number
+  status: 'todo' | 'done'
+  repeatRule: RepeatRule | null
+  repeatOf: number | null
+  note: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TaskWithSubject extends Task {
+  subjectName: string | null
+  subjectColor: string | null
+}
+
+export interface TaskInput {
+  subjectId: number | null
+  title: string
+  date: string
+  estimatedMinutes?: number | null
+  repeatRule?: RepeatRule | null
+  note?: string | null
+}
+
+export interface TaskUpdate {
+  id: number
+  subjectId?: number | null
+  title?: string
+  date?: string
+  estimatedMinutes?: number | null
+  status?: 'todo' | 'done'
+  note?: string | null
+}
+
+export interface Phase {
+  id: string
+  name: string
+  start: string
+  end: string
+}
+
 export const SETTING_KEYS = {
   examDate: 'exam_date',
   pomodoroFocus: 'pomodoro_focus_min',
   pomodoroBreak: 'pomodoro_break_min',
   pomodoroLongBreak: 'pomodoro_long_break_min',
   pomodoroLongEvery: 'pomodoro_long_every',
-  reviewIntervals: 'review_intervals'
+  reviewIntervals: 'review_intervals',
+  phasePlan: 'phase_plan'
 } as const
+
+export const DEFAULT_PHASES: Phase[] = [
+  { id: 'basic', name: '基础阶段', start: '2026-03-01', end: '2026-07-31' },
+  { id: 'strengthen', name: '强化阶段', start: '2026-08-01', end: '2026-10-31' },
+  { id: 'sprint', name: '冲刺阶段', start: '2026-11-01', end: '2026-12-25' }
+]
 
 /** 首次启动时写入的默认设置 */
 export const DEFAULT_SETTINGS: Record<string, string> = {
@@ -41,5 +97,6 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   [SETTING_KEYS.pomodoroBreak]: '5',
   [SETTING_KEYS.pomodoroLongBreak]: '15',
   [SETTING_KEYS.pomodoroLongEvery]: '4',
-  [SETTING_KEYS.reviewIntervals]: '1,2,4,7,15,30'
+  [SETTING_KEYS.reviewIntervals]: '1,2,4,7,15,30',
+  [SETTING_KEYS.phasePlan]: JSON.stringify(DEFAULT_PHASES)
 }

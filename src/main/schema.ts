@@ -19,6 +19,7 @@ export const tasks = sqliteTable('tasks', {
   priority: integer('priority').notNull().default(0),
   status: text('status').notNull().default('todo'),
   repeatRule: text('repeat_rule'),
+  repeatOf: integer('repeat_of'),
   note: text('note'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Brain, Clock3, ListTodo } from 'lucide-react'
+import { Brain, ChevronLeft, ChevronRight, Clock3, ListTodo, Plus, Repeat, Trash2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { SETTING_KEYS, type SettingsMap } from '../../../shared/types'
+import { SETTING_KEYS, type Subject, type SettingsMap, type TaskWithSubject } from '../../../shared/types'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -13,8 +13,35 @@ function greeting(hour: number): string {
   return '晚上好'
 }
 
+function toLocalDateStr(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${m}-${day}`
+}
+
+function dateLabel(date: string, offset: number): string {
+  const d = new Date(`${date}T00:00:00`)
+  const base = `${d.getMonth() + 1} 月 ${d.getDate()} 日 周${WEEKDAYS[d.getDay()]}`
+  if (offset === 0) return `今天 · ${base}`
+  if (offset === 1) return `明天 · ${base}`
+  if (offset === -1) return `昨天 · ${base}`
+  return base
+}
+
 export default function TodayPage() {
   const [settings, setSettings] = useState<SettingsMap | null>(null)
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [tasks, setTasks] = useState<TaskWithSubject[]>([])
+  const [offset, setOffset] = useState(0)
+  const [title, setTitle] = useState('')
+  const [minutes, setMinutes] = useState('')
+  const [subjectId, setSubjectId] = useState<number | null>(null)
+
+  const date = useMemo(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + offset)
+    return toLocalDateStr(d)
+  }, [offset])
 
   useEffect(() => {
     window.api.settings
@@ -24,7 +51,53 @@ export default function TodayPage() {
         console.error('加载设置失败', err)
         setSettings({})
       })
+    window.api.subjects
+      .list()
+      .then((list) => {
+        setSubjects(list)
+        setSubjectId((prev) => prev ?? list[0]?.id ?? null)
+      })
+      .catch((err) => console.error('加载科目失败', err))
   }, [])
+
+  useEffect(() => {
+    reload()
+  }, [date])
+
+  function reload() {
+    window.api.tasks
+      .listByDate(date)
+      .then(setTasks)
+      .catch((err) => console.error('加载任务失败', err))
+  }
+
+  async function add() {
+    const trimmed = title.trim()
+    if (!trimmed) return
+    try {
+      await window.api.tasks.create({
+        subjectId,
+        title: trimmed,
+        date,
+        estimatedMinutes: minutes ? Number(minutes) : null
+      })
+      setTitle('')
+      setMinutes('')
+      reload()
+    } catch (err) {
+      console.error('添加任务失败', err)
+    }
+  }
+
+  async function toggle(id: number) {
+    await window.api.tasks.toggle(id)
+    reload()
+  }
+
+  async function remove(id: number) {
+    await window.api.tasks.remove(id)
+    reload()
+  }
 
   const { daysLeft, examYear } = useMemo(() => {
     const raw = settings?.[SETTING_KEYS.examDate]
@@ -37,8 +110,11 @@ export default function TodayPage() {
     return { daysLeft: diff, examYear: String(exam.getFullYear() + 1) }
   }, [settings])
 
+  const doneCount = tasks.filter((t) => t.status === 'done').length
+  const totalMinutes = tasks.reduce((sum, t) => sum + (t.estimatedMinutes ?? 0), 0)
+
   const now = new Date()
-  const dateLabel = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 星期${WEEKDAYS[now.getDay()]}`
+  const todayLabel = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 星期${WEEKDAYS[now.getDay()]}`
 
   return (
     <div className="mx-auto max-w-5xl px-10 py-8">
@@ -46,7 +122,7 @@ export default function TodayPage() {
         <h1 className="text-2xl font-bold text-slate-900">
           {greeting(now.getHours())},保持专注!
         </h1>
-        <p className="mt-1 text-sm text-slate-500">{dateLabel}</p>
+        <p className="mt-1 text-sm text-slate-500">{todayLabel}</p>
       </header>
 
       <section className="mt-6 overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-500 px-8 py-7 text-white shadow-sm">
@@ -80,23 +156,154 @@ export default function TodayPage() {
       </section>
 
       <section className="mt-6 grid grid-cols-3 gap-4">
-        <StatCard icon={ListTodo} label="今日任务" value="0" hint="待办 0 · 已完成 0" />
+        <StatCard
+          icon={ListTodo}
+          label="今日任务"
+          value={`${doneCount}/${tasks.length}`}
+          hint={
+            tasks.length > 0
+              ? `已完成 ${doneCount} · 预计共 ${totalMinutes} 分钟`
+              : '还没有安排任务'
+          }
+        />
         <StatCard icon={Clock3} label="今日专注" value="0 分钟" hint="番茄钟将在 V0.3 接入" />
         <StatCard icon={Brain} label="待复习" value="0" hint="复习引擎将在 V0.4 接入" />
       </section>
 
-      <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h3 className="text-sm font-semibold text-slate-700">今日任务</h3>
-          <div className="mt-4 flex h-28 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-400">
-            任务管理将在 V0.2 上线,届时可在这里安排每天的学习
+      <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-700">任务清单</h3>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setOffset((o) => o - 1)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                title="前一天"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="min-w-32 text-center text-xs font-medium text-slate-600">
+                {dateLabel(date, offset)}
+              </span>
+              <button
+                onClick={() => setOffset((o) => o + 1)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                title="后一天"
+              >
+                <ChevronRight size={16} />
+              </button>
+              {offset !== 0 && (
+                <button
+                  onClick={() => setOffset(0)}
+                  className="ml-1 rounded-lg bg-slate-100 px-2 py-1 text-xs text-slate-500 hover:bg-slate-200"
+                >
+                  回到今天
+                </button>
+              )}
+            </div>
+          </div>
+
+          <ul className="mt-3 divide-y divide-slate-50">
+            {tasks.map((task) => (
+              <li key={task.id} className="group flex items-center gap-3 py-2.5">
+                <button
+                  onClick={() => toggle(task.id)}
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
+                    task.status === 'done'
+                      ? 'border-indigo-500 bg-indigo-500 text-white'
+                      : 'border-slate-300 hover:border-indigo-400'
+                  }`}
+                  title={task.status === 'done' ? '标记为未完成' : '标记为完成'}
+                >
+                  {task.status === 'done' && <span className="text-[10px]">✓</span>}
+                </button>
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: task.subjectColor ?? '#cbd5e1' }}
+                  title={task.subjectName ?? '未分类'}
+                />
+                <span
+                  className={`flex-1 truncate text-sm ${
+                    task.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'
+                  }`}
+                  title={task.title}
+                >
+                  {task.title}
+                </span>
+                {task.repeatOf != null && (
+                  <span title="来自重复任务">
+                    <Repeat size={13} className="shrink-0 text-slate-300" />
+                  </span>
+                )}
+                {task.estimatedMinutes != null && (
+                  <span className="shrink-0 text-xs text-slate-400">
+                    {task.estimatedMinutes} 分钟
+                  </span>
+                )}
+                <button
+                  onClick={() => remove(task.id)}
+                  className="rounded-lg p-1.5 text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                  title="删除"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </li>
+            ))}
+            {tasks.length === 0 && (
+              <li className="py-8 text-center text-sm text-slate-400">
+                这天还没有任务,在下方添加一个吧
+              </li>
+            )}
+          </ul>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && add()}
+              placeholder="新任务,如:英语真题阅读 2 篇"
+              className="min-w-40 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+            />
+            <select
+              value={subjectId ?? ''}
+              onChange={(e) => setSubjectId(e.target.value ? Number(e.target.value) : null)}
+              className="rounded-lg border border-slate-200 px-2 py-2 text-sm outline-none focus:border-indigo-400"
+            >
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min={5}
+              step={5}
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && add()}
+              placeholder="分钟"
+              className="w-20 rounded-lg border border-slate-200 px-2 py-2 text-sm outline-none focus:border-indigo-400"
+            />
+            <button
+              onClick={add}
+              disabled={!title.trim()}
+              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Plus size={15} />
+              添加
+            </button>
           </div>
         </div>
+
         <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <h3 className="text-sm font-semibold text-slate-700">今日复习</h3>
-          <div className="mt-4 flex h-28 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-400">
+          <div className="mt-4 flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-200 px-4 text-center text-sm text-slate-400">
             到期的知识点与错题将出现在这里(V0.4)
           </div>
+          <p className="mt-4 text-xs leading-5 text-slate-400">
+            提示:在「计划」页可以创建重复任务(如每天背单词),会自动出现在每天的任务清单里
+          </p>
         </div>
       </section>
     </div>

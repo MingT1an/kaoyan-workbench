@@ -108,8 +108,21 @@ export function initDatabase(): void {
   sqlite.pragma('journal_mode = WAL')
   sqlite.pragma('foreign_keys = ON')
   sqlite.exec(DDL)
+  migrate(sqlite)
   db = drizzle(sqlite, { schema })
   seed()
+}
+
+/** 老库升级:逐版本补充新增列 */
+function migrate(sqlite: Database.Database): void {
+  const cols = (table: string): string[] =>
+    (sqlite.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>).map(
+      (c) => c.name
+    )
+
+  if (!cols('tasks').includes('repeat_of')) {
+    sqlite.exec('ALTER TABLE tasks ADD COLUMN repeat_of INTEGER REFERENCES tasks(id)')
+  }
 }
 
 function seed(): void {
